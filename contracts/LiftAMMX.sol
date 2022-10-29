@@ -107,13 +107,14 @@ contract LiftAMMX is ERC20 {
             feeAmount = (amountIn * LiquiditProviderFee / 1000);
             amountInWithFee = amountIn + feeAmount;
             
-            IERC20(tokenA).transferFrom(msg.sender, address(this), amountIn);
+            IERC20(tokenA).transferFrom(msg.sender, address(this), amountInWithFee);
             newBalance = k / (balanceA + amountIn);
             amountOut = balanceB - newBalance;
-            // Slippage protection added
+            
+            // Slippage protection added only for minAmountOut
             require(amountOut >= minAmountOut, "Minimum quantity exceeded");          
             IERC20(tokenB).transfer(msg.sender, amountOut);
-            amountFeeTokenA += feeAmount - amountIn;   
+            amountFeeTokenA += amountInWithFee - amountIn;   
 
         }
         else {
@@ -121,11 +122,14 @@ contract LiftAMMX is ERC20 {
             feeAmount = (amountIn * LiquiditProviderFee / 1000);
             amountInWithFee = amountIn + feeAmount;
 
-            IERC20(tokenB).transferFrom(msg.sender, address(this), amountIn);
+            IERC20(tokenB).transferFrom(msg.sender, address(this), amountInWithFee);
             newBalance = k / (balanceB + amountIn);
             amountOut = balanceA - newBalance;
+
+            // Slippage protection added only for minAmountOut
+            require(amountOut >= minAmountOut, "Minimum quantity exceeded");    
             IERC20(tokenA).transfer(msg.sender, amountOut);
-            amountFeeTokenB += feeAmount - amountIn;   
+            amountFeeTokenB += amountInWithFee - amountIn;   
         }      
     }
 }
